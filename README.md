@@ -52,7 +52,7 @@ Pour notre exemple nous allons créer un fichier commande.feature dont le conten
 
     Feature: Commande
         Scenario: Running greeting command
-            When I run"php app/console app:greeting"
+            When I run "php bin/console app:greeting"
             Then I should see "Hello World"
             
 Cela fait, lancer la commande
@@ -64,7 +64,7 @@ Vous devriez avoir d'affiché
     Feature: Commande
         
       Scenario: Running greeting command         # src/AppBundle/Features/commande.feature:2
-        When I run"php app/console app:greeting"
+        When I run "php bin/console app:greeting"
         Then I should see "Hello World"
             
     1 scénario (1 indéfinis)
@@ -76,11 +76,12 @@ Vous devriez avoir d'affiché
       [0] None
       [1] AppBundle\Features\Context\FeatureContext
       >
-      
-Appuyez sur enter, et le terminal vous affiche les étapes manquantes pour effectuer les scénarios
+ 
+On nous dit qu'il y a des étapes non définies, il suffit d'appuyer sur enter 
+et le terminal vous affiche les étapes manquantes pour effectuer le scénario
 
     /**
-     * @When I run"php app\/console app:greeting"
+     * @When I run "php bin\/console app:greeting"
      */
     public function iRunPhpAppConsoleAppGreeting()
     {
@@ -94,3 +95,106 @@ Appuyez sur enter, et le terminal vous affiche les étapes manquantes pour effec
     {
         throw new PendingException();
     }
+
+Il vous suffit de les copier et coller dans AppBundle/Features/Context/FeatureContext.php 
+et d'adapter le code celon ce que doit faire le scénario :
+
+    namespace AppBundle\Features\Context;
+        
+    use Behat\Behat\Context\Context;
+    use Behat\Behat\Tester\Exception\PendingException;
+    use Behat\Gherkin\Node\PyStringNode;
+    use Behat\Gherkin\Node\TableNode;
+    use Behat\Symfony2Extension\Context\KernelAwareContext;
+    use Symfony\Component\HttpKernel\KernelInterface;
+        
+    /**
+     * Defines application features from the specific context.
+     */
+    class FeatureContext implements Context, KernelAwareContext
+    {
+        private $kernel;
+        private $cmdOut = '';
+        
+        /**
+         * Initializes context.
+         *
+         * Every scenario gets its own context instance.
+         * You can also pass arbitrary arguments to the
+         * context constructor through behat.yml.
+         */
+        public function __construct()
+        {
+        }
+            
+        /**
+         * @When I run :arg1
+         */
+        public function iRunPhpAppConsoleAppGreeting($arg1)
+        {
+            $this->cmdOut = shell_exec($arg1);
+        }
+            
+        /**
+         * @Then I should see :arg1
+         */
+        public function iShouldSee($arg1)
+        {
+            if($this->cmdOut !== $arg1){sprintf("Could not see ".$arg1);}
+        }
+            
+        /**
+         * Sets Kernel instance.
+         *
+         * @param KernelInterface $kernel
+         */
+        public function setKernel(KernelInterface $kernel)
+        {
+            $this->kernel = $kernel;
+        }
+            
+        /**
+         * Get Kernel instance.
+         *
+         * @return KernelInterface
+         */
+        public function getKernel() {
+            return $this->kernel;
+        }
+    }
+    
+Et bien sûr il faut créer la commande app:greeting dans AppBundle/Command/Greeting.php
+
+    namespace AppBundle\Command;
+        
+    use Symfony\Component\Console\Command\Command;
+    use Symfony\Component\Console\Input\InputInterface;
+    use Symfony\Component\Console\Output\OutputInterface;
+        
+    class HelloCommand extends Command
+    {
+        protected function configure()
+        {
+            $this->setName('app:greeting');
+        }
+        protected function execute(InputInterface $input, OutputInterface $output)
+        {
+            $output->writeln('Hello World');
+        }
+    }
+    
+Relancez une dernière fois la commande
+
+    /vendor/bin/behat
+    
+Et vous devriez avoir
+
+    Feature: Commande
+        
+      Scenario: Running greeting command          # src/AppBundle/Features/commande.feature:2
+        When I run "php bin/console app:greeting" # AppBundle\Features\Context\FeatureContext::iRun()
+        Then I should see "Hello World"           # AppBundle\Features\Context\FeatureContext::iShouldSee()
+            
+    1 scénario (1 succès)
+    2 étapes (2 succès)
+    0m0.11s (15.63Mb)

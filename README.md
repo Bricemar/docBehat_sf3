@@ -163,7 +163,7 @@ et d'adapter le code celon ce que doit faire le scénario :
         }
     }
     
-Et bien sûr il faut créer la commande app:greeting dans AppBundle/Command/Greeting.php
+Et bien sûr il faut créer la commande app:greeting dans AppBundle/Command/HelloCommand.php
 
     namespace AppBundle\Command;
         

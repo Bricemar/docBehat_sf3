@@ -1,13 +1,10 @@
-Documentation BeHat
+Documentation BeHat Symfony3
 ========================
-
-La première partie du README.md concerne l'installation et la configuration sur une instance Symfony2, 
-la seconde concerne ce dépôt, et la dernière sera pour ine installation plus générale
 
 Installation
 ------------
 
-    composer require behat/behat
+    composer require behat/symfony2-extension
 
 Configuration
 -------------
@@ -15,6 +12,8 @@ Configuration
 Créez un fichier **behat.yml** à la racine du projet (au même niveau que composer.json) 
 
     default:
+        extensions:
+                Behat\Symfony2Extension: ~
         suites:
             app_suite:
                 type: symfony_bundle
@@ -25,4 +24,4 @@ Pour plus d'information vous pouvez aller voir : http://docs.behat.org/en/v2.5/g
 
 Lancez la commande
 
-    bin/behat -init -suite=app_suite
+    vendor/bin/behat -init -suite=app_suite

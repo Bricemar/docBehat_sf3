@@ -185,7 +185,7 @@ Et bien sûr il faut créer la commande app:greeting dans AppBundle/Command/Gree
     
 Relancez une dernière fois la commande
 
-    /vendor/bin/behat
+    vendor/bin/behat
     
 Et vous devriez avoir
 
